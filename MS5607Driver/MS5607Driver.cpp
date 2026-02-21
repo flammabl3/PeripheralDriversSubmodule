@@ -6,6 +6,7 @@
  ******************************************************************************** */
 /************************************ * INCLUDES ************************************/
 #include "MS5607Driver.hpp"
+#include "stm32h7xx_hal_gpio.h"
 /************************************ * PRIVATE MACROS AND DEFINES ************************************/
 /************************************ * VARIABLES ************************************/
 // Barometer Commands (should not be modified, non-const due to HAL and C++ strictness)
@@ -27,7 +28,7 @@ static uint8_t RESET_CMD = 0x1E;
  * @brief gets a single sample of barometer data
  * @returns a barometer data structure consisting of a 'temp' and 'pressure' variable
  */
-MS5607_DATA_t MS5607_Driver::getSample(){
+BaroData MS5607_Driver::getSample(){
 	/**
 	 * Variable Descriptions from MS5607-02BA03 Data Sheet:
 	 *
@@ -56,18 +57,18 @@ MS5607_DATA_t MS5607_Driver::getSample(){
 	// Variables
 	uint32_t pressureReading = 0;    // Stores a 24 bit value
 	uint32_t temperatureReading = 0;    // Stores a 24 bit value
-	MS5611_DATA_t data;
+	BaroData data;
 
 	// Reset the barometer
 	resetBarometer();
 
 	// Read PROM for calibration coefficients
-	uint16_t c1Sens = ReadCalibrationCoefficients(PROM_READ_SENS_CMD);
-	uint16_t c2Off = ReadCalibrationCoefficients(PROM_READ_OFF_CMD);
-	uint16_t c3Tcs = ReadCalibrationCoefficients(PROM_READ_TCS_CMD);
-	uint16_t c4Tco = ReadCalibrationCoefficients(PROM_READ_TCO_CMD);
-	uint16_t c5Tref = ReadCalibrationCoefficients(PROM_READ_TREF_CMD);
-	uint16_t c6Tempsens = ReadCalibrationCoefficients(PROM_READ_TEMPSENS_CMD);
+	uint16_t c1Sens = readCalibrationCoefficients(PROM_READ_SENS_CMD);
+	uint16_t c2Off = readCalibrationCoefficients(PROM_READ_OFF_CMD);
+	uint16_t c3Tcs = readCalibrationCoefficients(PROM_READ_TCS_CMD);
+	uint16_t c4Tco = readCalibrationCoefficients(PROM_READ_TCO_CMD);
+	uint16_t c5Tref = readCalibrationCoefficients(PROM_READ_TREF_CMD);
+	uint16_t c6Tempsens = readCalibrationCoefficients(PROM_READ_TEMPSENS_CMD);
 
 	/**
 	 * Repeatedly read digital pressure and temperature.
@@ -107,11 +108,11 @@ MS5607_DATA_t MS5607_Driver::getSample(){
 		sens = sens - sens2;
 	}
 
-	int32_t p = (((pressureReading * sens) >> 21) - off) >> 15;   // Divide this value by 100 to get millibars
+	int64_t p = ((((int64_t)pressureReading * sens) >> 21) - off) >> 15;   // Divide this value by 100 to get millibars
 
 	/* Store Data --------------------------------------------------------*/
 	data.pressure = p;
-	data.temperature = temp;
+	data.temp = temp;
 
 	return data;
 
@@ -158,6 +159,8 @@ void MS5607_Driver::resetBarometer()
 	HAL_SPI_Transmit(hspi, &RESET_CMD, CMD_SIZE, CMD_TIMEOUT);
 	osDelay(4); // 2.8ms reload after Reset command
 	HAL_GPIO_WritePin(cs_gpio, cs_pin, GPIO_PIN_SET);
+
+
 }
 
 /**

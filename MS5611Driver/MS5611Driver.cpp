@@ -6,6 +6,7 @@
  ******************************************************************************** */
 /************************************ * INCLUDES ************************************/
 #include "MS5611Driver.hpp"
+#include "stm32h7xx_hal_gpio.h"
 /************************************ * PRIVATE MACROS AND DEFINES ************************************/
 /************************************ * VARIABLES ************************************/
 // Barometer Commands (should not be modified, non-const due to HAL and C++ strictness)
@@ -23,11 +24,18 @@ static uint8_t RESET_CMD = 0x1E;
 /************************************ * FUNCTION DECLARATIONS ************************************/
 /************************************ * FUNCTION DEFINITIONS ************************************/
 
+MS5611_Driver::MS5611_Driver(SPI_HandleTypeDef* hspi_, GPIO_TypeDef* cs_gpio_, uint16_t cs_pin_){
+	hspi = hspi_;
+	cs_gpio = cs_gpio_;
+	cs_pin = cs_pin_;
+
+}
+
 /**
  * @brief gets a single sample of barometer data
  * @returns a barometer data structure consisting of a 'temp' and 'pressure' variable
  */
-MS5611_DATA_t MS5611_Driver::getSample(){
+BaroData MS5611_Driver::getSample(){
 	/**
 	 * Variable Descriptions from MS5607-02BA03 Data Sheet:
 	 *
@@ -57,18 +65,18 @@ MS5611_DATA_t MS5611_Driver::getSample(){
 	uint32_t pressureReading = 0;    // Stores a 24 bit value
 	uint32_t temperatureReading = 0;    // Stores a 24 bit value
 	uint8_t dataInBuffer;
-	MS5611_DATA_t data;
+	BaroData data;
 
 	// Reset the barometer
 	resetBarometer();
 
 	// Read PROM for calibration coefficients
-	uint16_t c1Sens = ReadCalibrationCoefficients(PROM_READ_SENS_CMD);
-	uint16_t c2Off = ReadCalibrationCoefficients(PROM_READ_OFF_CMD);
-	uint16_t c3Tcs = ReadCalibrationCoefficients(PROM_READ_TCS_CMD);
-	uint16_t c4Tco = ReadCalibrationCoefficients(PROM_READ_TCO_CMD);
-	uint16_t c5Tref = ReadCalibrationCoefficients(PROM_READ_TREF_CMD);
-	uint16_t c6Tempsens = ReadCalibrationCoefficients(PROM_READ_TEMPSENS_CMD);
+	uint16_t c1Sens = readCalibrationCoefficients(PROM_READ_SENS_CMD);
+	uint16_t c2Off = readCalibrationCoefficients(PROM_READ_OFF_CMD);
+	uint16_t c3Tcs = readCalibrationCoefficients(PROM_READ_TCS_CMD);
+	uint16_t c4Tco = readCalibrationCoefficients(PROM_READ_TCO_CMD);
+	uint16_t c5Tref = readCalibrationCoefficients(PROM_READ_TREF_CMD);
+	uint16_t c6Tempsens = readCalibrationCoefficients(PROM_READ_TEMPSENS_CMD);
 
 	/**
 	 * Repeatedly read digital pressure and temperature.
@@ -112,7 +120,7 @@ MS5611_DATA_t MS5611_Driver::getSample(){
 
 	/* Store Data --------------------------------------------------------*/
 	data.pressure = p;
-	data.temperature = temp;
+	data.temp = temp;
 
 	return data;
 
@@ -186,7 +194,7 @@ uint32_t MS5611_Driver::getTemperatureReading()
 
 	HAL_GPIO_WritePin(cs_gpio, cs_pin, GPIO_PIN_SET);
 
-	return temperatureReading();
+	return temperatureReading;
 }
 
 /**
@@ -224,7 +232,7 @@ uint32_t MS5611_Driver::getPressureReading()
 
 	HAL_GPIO_WritePin(cs_gpio, cs_pin, GPIO_PIN_SET);
 
-	return pressureReading();
+	return pressureReading;
 }
 
 
@@ -238,3 +246,5 @@ void MS5611_Driver::resetBarometer()
 	osDelay(4); // 2.8ms reload after Reset command
 	HAL_GPIO_WritePin(cs_gpio, cs_pin, GPIO_PIN_SET);
 }
+
+

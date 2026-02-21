@@ -14,8 +14,8 @@
 #include "main.h"
 #include <cstdint>
 #include <cstring>
-#include "stm32g4xx_hal.h"
-#include "stm32g4xx_hal_gpio.h"
+#include "stm32h7xx_hal.h"
+#include "stm32h7xx_hal_gpio.h"
 #include "SystemDefines.hpp"
 
 /************************************

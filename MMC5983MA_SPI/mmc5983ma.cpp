@@ -7,35 +7,47 @@
 #include "mmc5983ma.hpp"
 #include "mmc5983ma_regs.hpp"
 #include "spi_wrapper.hpp" 
+#include "stm32h7xx_hal_gpio.h"
+#include "SensorDataTypes.hpp"
+#include "main.h"
 #include <cstdint>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 
+extern SPI_HandleTypeDef hspi2;
 /**
  * @brief Constructor
  */
-MMC5983MA::MMC5983MA(SPI_Wrapper* spiBus, GPIO_TypeDef* csPort, uint16_t csPin) :
-    _spi(spiBus), 
-    _csPort(csPort),
-    _csPin(csPin) 
+MMC5983MA::MMC5983MA()
 {
-    // Constructor body.
+
+}
+
+MMC5983MA_Status MMC5983MA::Init(SPI_HandleTypeDef* hspi, GPIO_TypeDef* csPort, uint16_t csPin)
+{
+	_hspi = hspi;
+	_csPort = csPort;
+	_csPin  = csPin;
+
+    HAL_Delay(10);
     // Set the chip select pin HIGH (idle) by default.
     HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_SET);
-}
 
-MMC5983MA_Status MMC5983MA::begin(){
     uint8_t productID = getProductID();
 
-    if (productID == MMC5983MA_PRODUCT_ID_VALUE) {
-        return MMC5983MA_Status::OK;
-    }
-    else {
-        return MMC5983MA_Status::ERR_INVALID_ARG;
-    }
+   if (productID == MMC5983MA_PRODUCT_ID_VALUE) {
+	   return MMC5983MA_Status::OK;
+   }
+   else {
+	   return MMC5983MA_Status::ERR_INVALID_ARG;
+   }
+   //default 200Hz sampling rate
+   writeRegister(MMC5983MA_IT_CONTROL1, MMC5983MA_BW_200HZ);
 }
+
+
 
 uint8_t MMC5983MA::getProductID(){
     // (P ID at 0x2F)
@@ -179,14 +191,14 @@ MMC5983MA_Status MMC5983MA::readData(MagData& data) {
 
 void MMC5983MA::writeRegister(std::uint8_t reg, std::uint8_t value) {
     // Write : R/W bit (0) == 0
-    uint8_t cmd_byte = (reg << 2) & 0xFC;
+    uint8_t cmd_byte = (0x00|(reg & 0x7f));
     uint8_t txBuffer[2] = { cmd_byte, value };
 
     // Pull cd Low to select the chip
     HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_RESET);
 
     // Use our wrapper to transmit the 2 bytes
-    _spi->transmit(txBuffer, 2);
+    HAL_SPI_Transmit(_hspi, txBuffer, 2, 150);
 
     // Pull CS High to deselect the chip
     HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_SET);
@@ -195,21 +207,17 @@ void MMC5983MA::writeRegister(std::uint8_t reg, std::uint8_t value) {
 uint8_t MMC5983MA::readRegister(uint8_t reg){
     // Read : R/W bit (0) == 1
     // Shift address left 2 bits, then OR with 0x01 to set the Read bit
-    uint8_t cmd_byte = ((reg << 2) & 0xFC) | 0x01;
+    uint8_t cmd_byte[] = {(0x80 | (reg & 0x7f)), 0x00};
+    uint8_t rx_data[] = {0, 0};
 
-    // Pull CS Low
     HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_RESET);
+	HAL_SPI_TransmitReceive(_hspi, cmd_byte, rx_data, 2, 1000);
+	HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_SET);
 
-    // 1. Send the command byte
-    _spi->transfer(cmd_byte);
 
-    // 2. Send dummy byte (0x00) to clock out the data
-    uint8_t rx_value = _spi->transfer(0x00);
+	return rx_data[1];
 
-    // Pull CS High
-    HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_SET);
 
-    return rx_value;
 }
 
 /**
@@ -217,21 +225,26 @@ uint8_t MMC5983MA::readRegister(uint8_t reg){
  */
 void MMC5983MA::readRegisters(std::uint8_t reg, std::uint8_t* buffer, std::uint8_t len) {
     // 1. Create the command byte (same as readRegister)
-    uint8_t cmd_byte = ((reg << 2) & 0xFC) | 0x01;
+	uint8_t tx[len+1];
+	uint8_t rx[len+1];
+	tx[0] = (0b10000000 | (0x7f & reg));// first 8 bits must be R and start reg
 
+	for(uint8_t i = 1; i < len + 1; i++){
+		tx[i] = 0x00; //fill tx with spi dummy bytes
+	}
     // Pull CS Low
     HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_RESET);
 
     // 2. Send the command/address byte
-    _spi->transfer(cmd_byte);
+    HAL_SPI_TransmitReceive(_hspi, tx, rx, len + 1, 150);
     
-    // 3. Read 'len' bytes into buffer
-    for (uint8_t i = 0; i < len; ++i) {
-        buffer[i] = _spi->transfer(0x00); // Send dummy byte to clock out data
-    }
-
     // Pull CS High
     HAL_GPIO_WritePin(_csPort, _csPin, GPIO_PIN_SET);
+
+
+	for(uint16_t i = 0; i < len; i++){
+		buffer[i] = rx[i+1];  //copy back i+1 into out since first byte is command garbage
+	}
 
 
 }

@@ -87,8 +87,8 @@ void LIS3MDLTR_Driver::GetMultipleRegisters(LIS3MDLTR_REGISTER_t startreg, int n
  * @param temp Buffer includes temperature data
  * @return Struct containing extracted data
  */
-const LIS3MDLTR_DATA_t LIS3MDLTR_Driver::GetDataFromBuf(const uint8_t *buf, bool mag, bool temp) {
-	LIS3MDLTR_DATA_t out;
+const MagData2 LIS3MDLTR_Driver::GetDataFromBuf(const uint8_t *buf, bool mag, bool temp) {
+	MagData2 out;
 	size_t i = 0;
 
 	//both little-endian

@@ -1,7 +1,8 @@
 #ifndef TMUX1104_HPP
 #define TMUX1104_HPP
 
-#include "stm32g4xx.h"
+#include "stm32h7xx.h"
+#include "CubeDefines.hpp"
 
 enum class Camera : uint8_t{
 	NONE = 0,
@@ -36,3 +37,5 @@ class TMUX1104Driver{
 		bool enabled;
 
 };
+
+#endif

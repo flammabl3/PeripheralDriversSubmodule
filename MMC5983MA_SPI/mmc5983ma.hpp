@@ -6,24 +6,17 @@
 
 #ifndef MMC5983MA_HPP
 #define MMC5983MA_HPP
-
+#include "SensorDataTypes.hpp"
 #include "mmc5983ma_regs.hpp"
 #include "spi_wrapper.hpp" 
 #include <cstdint>
 // if needed: fw declaration for the SPIClass from HAL/SPI wrapper, 
 // class SPIClass; 
 extern "C" {
-    #include "stm32f4xx_hal.h"
+    #include "stm32h7xx_hal.h"
 }
 
-struct MagData {
-    std::uint32_t rawX;
-    std::uint32_t rawY;
-    std::uint32_t rawZ;
-    float scaledX;
-    float scaledY;
-    float scaledZ;
-};
+
 
 // New Status Enum
 enum class MMC5983MA_Status : uint8_t {
@@ -35,18 +28,16 @@ enum class MMC5983MA_Status : uint8_t {
 };
 class MMC5983MA {
 public:
-    /**
-     * @brief Constructor
-     * @param spiBus Pointer to an initialized SPI wrapper instance.
-     * @param csPin The GPIO pin for chip select.
-     */
-    MMC5983MA(SPI_Wrapper* spiBus, GPIO_TypeDef* csPort, std::uint16_t csPin);
+
+    MMC5983MA();
+
+    MMC5983MA_Status Init(SPI_HandleTypeDef* hspi, GPIO_TypeDef* csPort, uint16_t csPin);
     
     /**
      * @brief Initializes the sensor.
      * @return True on success (e.g., product ID matches), false otherwise.
      */
-    MMC5983MA_Status begin();
+
 
     /**
      * @brief Triggers a new magnetic field measurement.
@@ -129,7 +120,7 @@ private:
     void readRegisters(std::uint8_t reg, std::uint8_t* buffer, std::uint8_t len);
     
     // Member variables
-    SPI_Wrapper* _spi;
+    SPI_HandleTypeDef* _hspi;
     std::uint16_t _csPin;
     GPIO_TypeDef* _csPort;
 

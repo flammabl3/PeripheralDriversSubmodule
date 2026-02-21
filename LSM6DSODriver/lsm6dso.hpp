@@ -1,19 +1,23 @@
 
+
 /**
  * @file lsm6dso.hpp
  * @brief Implementation of the LSM6DSO driver.
  * @author Jad Dina
  * @version 1.0
  * @date 2026-01-28
- */
+*/
+
 
 #ifndef LSM6DSO_DRIVER_LSM6DSO_HPP_
 #define LSM6DSO_DRIVER_LSM6DSO_HPP_
 
 
 
-#include "stm32h7xx_hal_gpio.h"
+
+#include "stm32h7xx_hal.h"
 #include "SensorDataTypes.hpp"
+#include "CubeDefines.hpp"
 
 constexpr uint8_t LSM6DSO_ID = 0x6C;
 typedef uint8_t LSM6DSO_REGISTER_t;
@@ -105,7 +109,5 @@ namespace LSM6DSO_REG{
 	//Z-axis
 	constexpr LSM6DSO_REGISTER_t OUTZ_L_A = 0x2C;
 	constexpr LSM6DSO_REGISTER_t OUTZ_H_A  = 0x2D;
-
-
-};
-#endif /* LSM6DSO_DRIVER_LSM6DSO_HPP_ */
+}
+#endif

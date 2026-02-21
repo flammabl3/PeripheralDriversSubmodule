@@ -8,23 +8,15 @@
 #ifndef LIS3MDLTRDRIVER_H_
 #define LIS3MDLTRDRIVER_H_
 
-#include "stm32h7xx.h"
+#include "stm32h7xx_hal_gpio.h"
+#include "SensorDataTypes.hpp"
 
 constexpr uint8_t SPI_DUMMY_BYTE = 0x00;
 constexpr uint8_t LIS3MDLTR_ID = 0b00111101;
 
 typedef uint8_t LIS3MDLTR_REGISTER_t;
 
-struct MAG_t {
-	int16_t x;
-	int16_t y;
-	int16_t z;
-};
 
-struct LIS3MDLTR_DATA_t {
-	MAG_t mag;
-	int16_t temp;
-};
 
 /* @brief Singleton SPI driver for the LIS3MDLTR magnetometer.
  * Must call Init before using any other functions besides SetCSPin.
@@ -55,7 +47,7 @@ public:
 	LIS3MDLTR_Driver(const LIS3MDLTR_Driver&) = delete;
 	LIS3MDLTR_Driver& operator=(const LIS3MDLTR_Driver&) = delete;
 
-	const LIS3MDLTR_DATA_t GetDataFromBuf(const uint8_t *buf, bool mag = true, bool temp = true);
+	const MagData2 GetDataFromBuf(const uint8_t *buf, bool mag = true, bool temp = true);
 
 	void SetCSPin(GPIO_TypeDef* gpio, uint16_t pin);
 

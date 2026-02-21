@@ -9,16 +9,11 @@
 /************************************ * INCLUDES ************************************/
 #include "SystemDefines.hpp"
 #include "cmsis_os.h"
+#include "SensorDataTypes.hpp"
 /************************************ * MACROS AND DEFINES ************************************/
-constexpr int TEMP_LOW = 2000;
-constexpr int TEMP_VERY_LOW = -1500;
-constexpr int CMD_SIZE = 1;
-constexpr int CMD_TIMEOUT = 150;
+
 /************************************ * TYPEDEFS ************************************/
-struct MS5607_DATA_t{
-	int16_t temp;
-	uint32_t pressure;
-};
+
 /************************************ * CLASS DEFINITIONS ************************************/
 /**
  * @brief the driver for MS5607 barometers
@@ -29,7 +24,7 @@ public:
 	MS5607_Driver(SPI_HandleTypeDef* hspi_, GPIO_TypeDef* cs_gpio_, uint16_t cs_pin_):
 		hspi(hspi_), cs_gpio(cs_gpio_), cs_pin(cs_pin_){}
 
-	MS5607_DATA_t getSample();
+	BaroData getSample();
 private:
 
 	//constants

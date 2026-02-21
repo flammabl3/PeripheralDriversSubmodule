@@ -23,11 +23,13 @@
 // system includes
 #include "SystemDefines.hpp"
 #include "Task.hpp"
+#include "SensorDataTypes.hpp"
 
 // Driver Includes
 #include "mmc5983ma.hpp"
 #include "spi_wrapper.hpp"
 
+extern SPI_HandleTypeDef hspi2;
 /************************************
  * CLASS DEFINITIONS
  ************************************/
@@ -48,19 +50,12 @@ public:
     };
 
 
-
-    void Init(SPI_HandleTypeDef* hspi);
-
     void InitTask();
-
-    void GetLatestData(MagData& dataOut);
 
 protected:
     static void RunTask(void* pvParams) { MMC5983MATask::Inst().Run(pvParams); }
     void Run(void* pvParams);
     void HandleCommand(Command& cm);
-
-    MagData _lastReading;
 
 
 private:
@@ -68,18 +63,21 @@ private:
     MMC5983MATask();
     MMC5983MATask(const MMC5983MATask&);
     MMC5983MATask& operator=(const MMC5983MATask&);
+    void LogData();
+
+    SPI_HandleTypeDef* _hspi = &hspi2;
+    GPIO_TypeDef* MMC_CS_PORT = MAG_CS_GPIO_Port;
+    const uint16_t MMC_CS_PIN = MAG_CS_Pin; // Adjust as needed
 
     // Obj to allow delayed inits
-    SPI_Wrapper* _spi_wrapper;
-    MMC5983MA* _magnetometer;
 
-    // Task Control Flags
-    bool _enableReading;
-    bool _enableLogging;
+
+    MMC5983MA magnetometer;
+    MagData magData;
+
 
     // Chip Select Port
-    GPIO_TypeDef* MMC_CS_PORT = GPIOA;
-    const uint16_t MMC_CS_PIN = GPIO_PIN_4; // Adjust as needed
+
 
 
 
