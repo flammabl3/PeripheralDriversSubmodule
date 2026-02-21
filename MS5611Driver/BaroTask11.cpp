@@ -67,9 +67,13 @@ void BaroTask11::Run(void * pvParams){
 
 
     while (1) {
-        /* Process commands in blocking mode */
+		data = barometer.getSample();
+		data.id = 1;
+
+		DataBroker::Publish<BaroData>(&data);
+
         Command cm;
-        bool res = qEvtQueue->ReceiveWait(cm);
+        bool res = qEvtQueue->Receive(cm, 333);
         if(res){
 
         	HandleCommand(cm);

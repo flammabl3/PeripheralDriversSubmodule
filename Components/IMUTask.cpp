@@ -63,9 +63,13 @@ void IMUTask::Run(void * pvParams){
 	imu.Init(hspi_, LSM6DSO32_CS_PORT, LSM6DSO32_CS_PIN);
 
     while (1) {
-        /* Process commands in blocking mode */
+		imu.ReadSensors(data);
+		imu_data = imu.ConvertRawMeasurementToStruct(data);
+		imu_data.id = 1;
+		DataBroker::Publish<IMUData>(&imu_data);
+
         Command cm;
-        bool res = qEvtQueue->ReceiveWait(cm);
+        bool res = qEvtQueue->Receive(cm, 333);
         if(res){
 
         	HandleCommand(cm);

@@ -122,9 +122,9 @@ const IMUData LSM6DO32_Driver::ConvertRawMeasurementToStruct(const uint8_t *buf,
 	}
 	out.temp = 25.0f + out.temp / 256.0f;
 
-	out.accel.x *= 0.732;
-	out.accel.y *= 0.732;
-	out.accel.z *= 0.732;
+	out.accel.x *= 0.488 / 1000.0f; //g/LSB
+	out.accel.y *= 0.488 / 1000.0f;
+	out.accel.z *= 0.488 / 1000.0f;
 
 	out.gyro.x *= 8.75;
 	out.gyro.y *= 8.75;
