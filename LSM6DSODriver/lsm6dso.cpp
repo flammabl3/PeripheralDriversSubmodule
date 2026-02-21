@@ -120,9 +120,9 @@ IMUData LSM6DSO_Driver::bytesToStruct(const uint8_t *raw_bytes, bool accel, bool
 	out.accel.y *= 0.488 / 1000.0f;
 	out.accel.z *= 0.488 / 1000.0f;
 
-	out.gyro.x *= 8.75; //mdps/LSB
-	out.gyro.y *= 8.75;
-	out.gyro.z *= 8.75;
+	out.gyro.x *= 8.75f; //mdps/LSB
+	out.gyro.y *= 8.75f;
+	out.gyro.z *= 8.75f;
 
 	out.temp = 25.0f + (out.temp / 256.0f);
 

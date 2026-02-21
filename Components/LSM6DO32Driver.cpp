@@ -7,6 +7,7 @@
 
 #include "LSM6DO32Driver.h"
 
+#include <cstring>
 
 /* @brief Initialize the driver. Must be called before any other functions can be used.
  * @param hspi_ Pointer to the SPI handle
@@ -77,7 +78,9 @@ void LSM6DO32_Driver::GetMultipleRegisters(LSM6DSO32_REGISTER_t startreg, int nu
 	transmit[0] = (uint8_t)(0b10000000 | startreg);
 
 	CSLow();
-	HAL_SPI_TransmitReceive(hspi, transmit, out, numBytes+1, 1000);
+	uint8_t temp[numBytes+1];
+	HAL_SPI_TransmitReceive(hspi, transmit, temp, numBytes+1, 1000);
+	memcpy(out, &temp[1], numBytes);
 	CSHigh();
 }
 
@@ -126,9 +129,9 @@ const IMUData LSM6DO32_Driver::ConvertRawMeasurementToStruct(const uint8_t *buf,
 	out.accel.y *= 0.488 / 1000.0f;
 	out.accel.z *= 0.488 / 1000.0f;
 
-	out.gyro.x *= 8.75;
-	out.gyro.y *= 8.75;
-	out.gyro.z *= 8.75;
+	out.gyro.x *= 8.75f;
+	out.gyro.y *= 8.75f;
+	out.gyro.z *= 8.75f;
 
 
 	return out;
