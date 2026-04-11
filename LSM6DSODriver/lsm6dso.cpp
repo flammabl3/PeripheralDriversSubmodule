@@ -5,7 +5,7 @@
  *
  *  Created on: Jan 29, 2026
  *      Author: Jad Dina
- */
+*/
 
 /* Includes ------------------------------------------------------------------*/
 #include "lsm6dso.hpp"
