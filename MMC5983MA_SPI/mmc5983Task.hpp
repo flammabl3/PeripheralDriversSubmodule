@@ -29,7 +29,7 @@
 #include "mmc5983ma.hpp"
 #include "spi_wrapper.hpp"
 
-extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi4;
 /************************************
  * CLASS DEFINITIONS
  ************************************/
@@ -65,7 +65,7 @@ private:
     MMC5983MATask &operator=(const MMC5983MATask &);
     void LogData();
 
-    SPI_HandleTypeDef *_hspi = &hspi2;
+    SPI_HandleTypeDef *_hspi = &hspi4;
     GPIO_TypeDef *MMC_CS_PORT = MAG_CS_GPIO_Port;
     const uint16_t MMC_CS_PIN = MAG_CS_Pin; // Adjust as needed
 

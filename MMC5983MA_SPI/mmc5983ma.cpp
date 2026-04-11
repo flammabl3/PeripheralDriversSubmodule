@@ -16,7 +16,7 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 
-extern SPI_HandleTypeDef hspi2;
+
 /**
  * @brief Constructor
  */

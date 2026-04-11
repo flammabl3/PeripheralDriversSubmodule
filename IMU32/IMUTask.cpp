@@ -8,7 +8,7 @@
 /************************************
  * INCLUDES
  ************************************/
-#include <IMU32/IMUTask.hpp>
+#include "IMUTask.hpp"
 #include "SystemDefines.hpp"
 #include "Command.hpp"
 #include "LoggingService.hpp"

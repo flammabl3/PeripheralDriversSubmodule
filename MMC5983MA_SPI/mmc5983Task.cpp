@@ -65,20 +65,25 @@ void MMC5983MATask::InitTask() // RTOS Task Init
 
 void MMC5983MATask::Run(void *pvParams) // Instance Run loop for task
 {
-    // Handle incoming commands (optional)
-    magnetometer.triggerMeasurement();
-    // vTaskDelay(pdMS_TO_TICKS(10));
-    magnetometer.readData(magData);
-    MagData publishedMagData;
-    publishedMagData.magX = magData.scaledX;
-    publishedMagData.magY = magData.scaledY;
-    publishedMagData.magZ = magData.scaledZ;
-    DataBroker::Publish<MagData>(&publishedMagData);
+    (void)pvParams;
 
-    Command cm;
-    if (qEvtQueue->Receive(cm, 333))
+    while (1)
     {
-        HandleCommand(cm);
+        // Periodically sample and publish magnetometer data.
+        magnetometer.triggerMeasurement();
+        magnetometer.readData(magData);
+
+        MagData publishedMagData;
+        publishedMagData.magX = magData.scaledX;
+        publishedMagData.magY = magData.scaledY;
+        publishedMagData.magZ = magData.scaledZ;
+        DataBroker::Publish<MagData>(&publishedMagData);
+
+        Command cm;
+        if (qEvtQueue->Receive(cm, 333))
+        {
+            HandleCommand(cm);
+        }
     }
 }
 
@@ -90,7 +95,18 @@ void MMC5983MATask::HandleCommand(Command &cm)
 
     case MMC5983MA_Commands::MMC_CMD_START_READ: // Start Readings
 
-        SOAR_PRINT("MMC5983MATask: Enabled Readings.\n");
+
+        magnetometer.triggerMeasurement();
+        magnetometer.readData(magData);
+
+        SOAR_PRINT("Mag rawX: %lu\n", (unsigned long)magData.rawX);
+		SOAR_PRINT("Mag rawY: %lu\n", (unsigned long)magData.rawY);
+		SOAR_PRINT("Mag rawZ: %lu\n", (unsigned long)magData.rawZ);
+
+		SOAR_PRINT("Mag scaledX: %ld\n", (long)magData.scaledX);
+		SOAR_PRINT("Mag scaledY: %ld\n", (long)magData.scaledY);
+		SOAR_PRINT("Mag scaledZ: %ld\n", (long)magData.scaledZ);
+
         break;
 
     case MMC5983MA_Commands::MMC_CMD_STOP_READ: // Stop Readings

@@ -103,6 +103,8 @@ void BaroTask07::HandleCommand(Command& cm){
 void BaroTask07::HandleRequestCommand(uint16_t taskCommand){
 	switch(taskCommand){
 	case BARO07_SAMPLE_AND_LOG:
+		SOAR_PRINT("Pressure: %d\n", data.pressure);
+		SOAR_PRINT("Temperature: %d\n", data.temp);
 
 
 

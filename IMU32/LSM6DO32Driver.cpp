@@ -5,7 +5,7 @@
  *      Author: goada
  */
 
-#include <IMU32/LSM6DO32Driver.h>
+#include <LSM6DO32Driver.h>
 #include <cstring>
 
 /* @brief Initialize the driver. Must be called before any other functions can be used.

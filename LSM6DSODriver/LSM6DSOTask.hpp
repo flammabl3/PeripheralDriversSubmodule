@@ -13,7 +13,7 @@
 #include "lsm6dso.hpp"
 #include "main.h"
 
-extern SPI_HandleTypeDef hspi3;
+extern SPI_HandleTypeDef hspi6;
 /************************************
  * MACROS AND DEFINES
  ************************************/
@@ -62,7 +62,7 @@ protected:
 	uint8_t data[14];
 	GPIO_TypeDef *LSM6DSO_CS_PORT = IMU16_CS_GPIO_Port;
 	const uint16_t LSM6DSO_CS_PIN = IMU16_CS_Pin; // adjust when needed
-	SPI_HandleTypeDef *hspi_ = &hspi3;			  // adjust this when needed
+	SPI_HandleTypeDef *hspi_ = &hspi6;			  // adjust this when needed
 
 private:
 	// Private Functions

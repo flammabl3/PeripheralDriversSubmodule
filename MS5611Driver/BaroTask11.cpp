@@ -96,10 +96,8 @@ void BaroTask11::HandleCommand(Command& cm){
 void BaroTask11::HandleRequestCommand(uint16_t taskCommand){
 	switch(taskCommand){
 	case BARO11_SAMPLE_AND_LOG:
-		data = barometer.getSample();
-		data.id = 1;
-		LogData();
-
+		SOAR_PRINT("Pressure: %d\n", data.pressure);
+		SOAR_PRINT("Temperature: %d\n", data.temp);
 	default:
 		break;
 	}

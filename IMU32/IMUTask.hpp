@@ -8,12 +8,12 @@
 #ifndef PERIPHERALDRIVERSSUBMODULE_COMPONENTS_IMUTASK_HPP_
 #define PERIPHERALDRIVERSSUBMODULE_COMPONENTS_IMUTASK_HPP_
 
-#include <IMU32/LSM6DO32Driver.h>
+#include <LSM6DO32Driver.h>
 #include "SensorDataTypes.hpp"
 #include "Task.hpp"
 #include "main.h"
 
-extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi2;
 /************************************
  * MACROS AND DEFINES
  ************************************/
@@ -62,7 +62,7 @@ protected:
 	uint8_t data[14];
 	GPIO_TypeDef *LSM6DSO32_CS_PORT = IMU32_CS_GPIO_Port;
 	const uint16_t LSM6DSO32_CS_PIN = IMU32_CS_Pin; // adjust when needed
-	SPI_HandleTypeDef *hspi_ = &hspi1;				// adjust this when needed
+	SPI_HandleTypeDef *hspi_ = &hspi2;				// adjust this when needed
 
 private:
 	// Private Functions

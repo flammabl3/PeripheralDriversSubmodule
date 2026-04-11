@@ -33,7 +33,7 @@ int main(void)
   SystemClock_Config();
   MX_GPIO_Init();
   MX_I2C1_Init(); // This initializes hi2c1
-
+  MC_UART_Init();
   /* --- SETUP STAGE --- */
   // 1. Create wrapper instance
   I2C_Wrapper i2c_bus_1(&hi2c1);
